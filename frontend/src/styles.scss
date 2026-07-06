@@ -1,0 +1,136 @@
+// ============================================
+// Clutchr — Design tokens (v2 "copilote de carrière")
+// Le violet ne doit jamais dépasser ~10% de l'écran :
+// il sert d'accent, pas de fond.
+// ============================================
+
+$bg-app: #F5F7FA;          // Fond général
+$bg-sidebar: #1B1C2A;      // Sidebar sombre neutre
+$bg-card: #FFFFFF;         // Cartes
+$text-primary: #0F172A;
+$text-secondary: #64748B;
+$text-muted: #94A3B8;
+
+$accent-primary: #7C5CFF;   // Violet — accent, jamais un fond large
+$accent-secondary: #F857C1; // Rose — accent secondaire
+$success: #2DD4BF;
+$warning: #F59E0B;
+$danger: #EF4444;
+
+$border-light: #E6E9EF;
+$border-medium: #D8DDE6;
+
+// Typographie — Inter uniquement, 3 graisses
+$font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$weight-regular: 400;
+$weight-medium: 500;
+$weight-semibold: 600;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 48px;
+
+// Rayons — généreux, "premium"
+$radius-sm: 10px;
+$radius-md: 14px;
+$radius-lg: 18px;
+$radius-xl: 24px;
+$radius-full: 9999px;
+
+// Ombres — très douces, jamais dures
+$shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+$shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06);
+$shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08);
+$shadow-glow-accent: 0 8px 24px rgba(124, 92, 255, 0.25);
+
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+
+@mixin responsive-md { @media (min-width: $breakpoint-md) { @content; } }
+@mixin responsive-lg { @media (min-width: $breakpoint-lg) { @content; } }
+
+// ============================================
+// Reset & base
+// ============================================
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 16px; }
+
+body {
+  font-family: $font-sans;
+  background: $bg-app;
+  color: $text-primary;
+  line-height: 1.55;
+  font-weight: $weight-regular;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: $weight-semibold;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+p { color: $text-secondary; }
+
+a { color: $accent-primary; text-decoration: none; }
+
+button { font-family: $font-sans; cursor: pointer; border: none; background: none; }
+
+input, textarea, select {
+  font-family: $font-sans;
+  &:focus { outline: none; }
+}
+
+// ============================================
+// Utilitaires partagés
+// ============================================
+.card {
+  background: $bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  transition: box-shadow $transition-normal, transform $transition-normal;
+}
+.card:hover { box-shadow: $shadow-md; transform: translateY(-2px); }
+
+.btn-primary {
+  background: linear-gradient(135deg, $accent-primary, darken($accent-primary, 8%));
+  color: white;
+  border-radius: $radius-md;
+  padding: 12px 20px;
+  font-weight: $weight-semibold;
+  font-size: 14px;
+  transition: box-shadow $transition-fast, transform $transition-fast;
+}
+.btn-primary:hover { box-shadow: $shadow-glow-accent; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+// Skeleton de chargement
+.skeleton {
+  background: linear-gradient(90deg, #EEF1F6 25%, #F5F7FA 50%, #EEF1F6 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: $radius-sm;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Compteur animé (count-up) — la classe déclenche juste la transition,
+// la valeur est animée en JS/TS dans le composant
+.count-up { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: $border-medium; border-radius: $radius-full; }
