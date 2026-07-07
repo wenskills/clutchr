@@ -36,9 +36,7 @@ const PRIORITY_ICONS: Record<string, string> = {
 
 /**
  * Tableau de bord décisionnel — chaque élément répond à "qu'est-ce que
- * je fais aujourd'hui ?". Aucune donnée affichée n'est inventée : les
- * priorités sont calculées côté serveur depuis l'historique réel, pas
- * générées par un modèle de langage.
+ * je fais aujourd'hui ?".
  */
 @Component({
   selector: 'app-dashboard',
