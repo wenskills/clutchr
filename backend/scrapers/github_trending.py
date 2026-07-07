@@ -1,22 +1,8 @@
 """
-Scraper GitHub Trending — cible d'apprentissage réelle.
+Scraper GitHub Trending.
 
 GitHub n'expose AUCUNE API officielle pour les tendances (contrairement
-aux données de repo classiques, disponibles via api.github.com) : c'est
-donc un cas légitime de scraping HTML, pas un contournement par flemme.
-
-Robots.txt vérifié (https://github.com/robots.txt) : `/trending` n'est
-PAS dans les chemins interdits (seuls /*/pulse et /*/tree/ le sont,
-des sous-pages de dépôts). On reste poli : un seul user-agent identifié,
-délai raisonnable, pas de pagination agressive.
-
-⚠️ Réalité du scraping : les sélecteurs CSS ci-dessous reflètent la
-structure HTML observée à la rédaction de ce code. Si GitHub change son
-balisage, le scraper renverra une liste vide (pas d'erreur bruyante) —
-inspectez la page (clic droit > Inspecter) et ajustez les sélecteurs
-dans `_parse_repo_article` si `fetch_trending_repos()` ne renvoie plus
-rien. C'est l'expérience d'apprentissage normale du scraping : la cible
-change, le code suit.
+aux données de repo classiques, disponibles via api.github.com).
 """
 import logging
 import re
