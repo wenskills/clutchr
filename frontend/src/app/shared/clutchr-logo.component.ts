@@ -2,17 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
- * Logo officiel Clutchr — l'image exacte fournie (icône recadrée
- * depuis le fichier original, fond rendu réellement transparent).
- * Le mot "clutchr" du fichier source est en encre sombre, illisible
- * sur les fonds foncés (sidebar, landing, auth) : il est donc recréé
- * en texte CSS avec un dégradé assorti pour ces contextes, plutôt que
- * d'utiliser l'image telle quelle et la rendre invisible.
- *
- * Animation : légère rotation continue (l'icône est un anneau/spirale,
- * la rotation lente évoque un mécanisme qui tourne — cohérent avec
- * "Clutchr" — plutôt qu'un battement de pouls).
- *
+ * Logo officiel Clutchr
  * Usage :
  *   <app-clutchr-logo [size]="32" [withWordmark]="true"></app-clutchr-logo>
  */
