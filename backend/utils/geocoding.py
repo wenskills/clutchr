@@ -1,12 +1,6 @@
 """
 Résolution nom de ville -> code commune INSEE, via l'API officielle
 gratuite geo.api.gouv.fr (zéro authentification, zéro inscription).
-
-Ce n'est PAS le "Service de géocodage" du catalogue francetravail.io
-(celui-là semble nécessiter son propre compte/OAuth et vise plutôt la
-validation d'adresses postales complètes) — c'est l'API "Découpage
-administratif" du gouvernement français, qui fait exactement ce dont on
-a besoin ici : convertir "Marseille" en "13055".
 """
 import logging
 
