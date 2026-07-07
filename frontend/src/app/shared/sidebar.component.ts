@@ -22,10 +22,6 @@ interface NotificationVM {
   created_at: string;
 }
 
-/**
- * Sidebar neutre, 72px replié (icônes seules), s'étend au survol pour
- * révéler les libellés. Ne doit jamais attirer l'œil — elle accompagne.
- */
 @Component({
   selector: 'app-sidebar',
   standalone: true,
