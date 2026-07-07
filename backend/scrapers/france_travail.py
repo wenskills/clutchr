@@ -7,12 +7,6 @@ Contrairement à Adzuna (simple clé d'API), France Travail utilise OAuth2
 contre un jeton d'accès temporaire, puis l'utiliser en Bearer sur l'API
 de recherche d'offres.
 
-⚠️ Les champs de réponse sont en français et différents d'Adzuna
-(intitule, entreprise.nom, lieuTravail.libelle...). Le salaire est un
-texte libre ("Mensuel de 2200 à 2500 Euros"), pas des nombres propres —
-on tente de l'extraire par regex, et on laisse `None` si on n'y arrive
-pas plutôt que d'inventer un chiffre.
-
 Le paramètre "lieu" de cette API attend un code commune INSEE, pas un
 nom de ville libre — la résolution est faite automatiquement via
 utils/geocoding.py (API gouv.fr, gratuite, sans clé).
