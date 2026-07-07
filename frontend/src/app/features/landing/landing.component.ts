@@ -27,12 +27,6 @@ const FEATURE_TABS: FeatureTab[] = [
     description: 'Compétences à fort impact, tendances réelles dans vos offres, écart avec ce que le marché demande.' },
 ];
 
-/**
- * Landing page — aucune donnée inventée : pas de faux avis, faux
- * chiffres d'utilisateurs, faux logos partenaires. Le produit étant
- * déjà fonctionnel, les appels à l'action mènent à la vraie inscription,
- * pas à une liste d'attente fictive.
- */
 @Component({
   selector: 'app-landing',
   standalone: true,
