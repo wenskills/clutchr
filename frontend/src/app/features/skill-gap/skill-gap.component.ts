@@ -9,8 +9,7 @@ interface GapEntry { skill: string; count: number; share: number; }
 
 /**
  * Analyse d'écart de compétences — agrégée depuis les `skill_gaps` déjà
- * calculés par offre lors du matching. Aucune nouvelle source externe :
- * c'est une lecture different de données qu'on a déjà.
+ * calculés par offre lors du matching.
  */
 @Component({
   selector: 'app-skill-gap',
