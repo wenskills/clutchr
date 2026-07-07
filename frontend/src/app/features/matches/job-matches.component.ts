@@ -40,11 +40,7 @@ const CLICK_MOVE_TOLERANCE = 8;
 
 /**
  * Offres correspondantes — un seul écran, deux modes d'affichage
- * (Liste / Swipe). Auparavant deux entrées de sidebar séparées pour
- * la même donnée ; fusionné pour ne garder qu'une seule notion
- * d'"Offres". Le mode swipe garde son geste de balayage gauche/droite
- * mais un simple clic (sans glissement significatif) ouvre l'offre
- * directement, comme sur la liste.
+ * (Liste / Swipe).
  */
 @Component({
   selector: 'app-job-matches',
