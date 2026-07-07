@@ -1,11 +1,5 @@
 """
 Interface commune à toutes les sources d'offres d'emploi.
-
-Pour ajouter une nouvelle source plus tard (ex: si vous obtenez un accès
-partenaire Welcome to the Jungle, ou décidez de scraper du HTML), créez
-une classe héritant de BaseJobScraper et implémentez `search()`.
-Le reste de l'application (tâches, vues, matching) ne dépend que de
-cette interface, pas de l'implémentation concrète.
 """
 from abc import ABC, abstractmethod
 from typing import TypedDict, Optional
