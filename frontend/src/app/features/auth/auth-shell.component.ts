@@ -12,9 +12,7 @@ type AuthMode = 'login' | 'register' | 'forgot' | 'twofa';
 declare const google: any;
 
 /**
- * Socle d'authentification — un seul canevas en dégradé continu
- * (façon Stripe/Linear), la carte flotte dessus. Pas de panneau coupé
- * en deux : le dégradé envahit tout le fond.
+ * Socle d'authentification.
  */
 @Component({
   selector: 'app-auth-shell',
