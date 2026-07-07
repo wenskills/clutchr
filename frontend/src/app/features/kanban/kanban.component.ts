@@ -49,10 +49,7 @@ interface FollowupSuggestion {
 /**
  * Pipeline de candidatures — Kanban avec glisser-déposer (Angular CDK)
  * couplé à de vrais indicateurs de pilotage, calculés depuis
- * l'historique réel des changements de statut (voir
- * JobMatchStatusEvent côté backend). Aucune statistique de marché
- * n'est affichée : seulement ce qui est vérifiable depuis vos propres
- * candidatures.
+ * l'historique réel des changements de statut.
  */
 @Component({
   selector: 'app-kanban',
