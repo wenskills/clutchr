@@ -2,23 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
-/**
- * Icônes "façon Lucide" dessinées à la main (lignes fines, coins ronds,
- * viewBox 24x24, stroke-width 2) — pas de dépendance npm.
- *
- * Pourquoi : @lucide/angular nécessite Angular 17+ (notre projet est en
- * 16.2) et l'ancien lucide-angular vient d'être retiré par les
- * mainteneurs. Plutôt que de risquer un build cassé, on reproduit le
- * même langage visuel à la main pour le sous-ensemble d'icônes dont on
- * a besoin. Facile à étendre : ajouter une entrée dans `PATHS`.
- *
- * Le contenu injecté via [innerHTML] est 100% statique et écrit par
- * nous (jamais de donnée utilisateur) — on utilise bypassSecurityTrustHtml
- * uniquement pour garantir un rendu fiable des balises SVG, peu importe
- * la liste blanche du sanitizer Angular par défaut.
- *
- * Usage: <app-icon name="home" [size]="20"></app-icon>
- */
+
 @Component({
   selector: 'app-icon',
   standalone: true,
