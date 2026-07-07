@@ -131,8 +131,7 @@ CORS_ALLOWED_ORIGINS = config(
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:4200')
 
 # E-mail : en dev, les e-mails s'affichent dans la console du serveur Django
-# (aucun service d'envoi réel n'est configuré). Pour un vrai envoi en
-# production, remplacer par un backend SMTP et renseigner les variables ci-dessous.
+# (aucun service d'envoi réel n'est configuré).
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='no-reply@clutchr.app')
 
@@ -142,7 +141,7 @@ GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
 
 # Recherche d'offres — Adzuna (API publique gratuite, inscription sur
 # https://developer.adzuna.com/). Indeed (API de recherche dépréciée) et
-# Glassdoor (pas d'API publique) ne sont pas utilisables pour ce cas d'usage.
+# Glassdoor (pas d'API publique).
 ADZUNA_APP_ID = config('ADZUNA_APP_ID', default='')
 ADZUNA_APP_KEY = config('ADZUNA_APP_KEY', default='')
 ADZUNA_COUNTRY = config('ADZUNA_COUNTRY', default='fr')
@@ -152,7 +151,7 @@ ADZUNA_COUNTRY = config('ADZUNA_COUNTRY', default='fr')
 FRANCETRAVAIL_CLIENT_ID = config('FRANCETRAVAIL_CLIENT_ID', default='')
 FRANCETRAVAIL_CLIENT_SECRET = config('FRANCETRAVAIL_CLIENT_SECRET', default='')
 
-# Contenu LinkedIn — Gemini (clé déjà utilisée pour ATlaS, réutilisable ici)
+# Contenu LinkedIn — Gemini
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-2.5-flash')
 
