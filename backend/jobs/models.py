@@ -1,5 +1,5 @@
 """
-Models for Clutchr job matching platform
+Modèles Clutchr
 """
 from django.db import models
 from django.contrib.auth.models import User
