@@ -1,6 +1,4 @@
-"""
-Django REST Framework serializers for Clutchr API
-"""
+
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from jobs.models import UserProfile, JobListing, JobMatch, CompanyContact, TechTrend, Contact, Notification, LinkedInPost
