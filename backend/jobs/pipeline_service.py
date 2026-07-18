@@ -1,12 +1,5 @@
 """
 Service d'analyse du pipeline de candidatures.
-
-Toute statistique ici est calculée à partir de JobMatchStatusEvent —
-l'historique réel des changements de statut — jamais à partir du seul
-statut courant (qui ne garderait pas trace, par exemple, d'un entretien
-obtenu avant un refus final). Aucune statistique de marché externe
-("cette entreprise répond en moyenne en 11 jours") n'est utilisée : on
-ne dispose pas de cette donnée et il serait malhonnête de l'inventer.
 """
 from django.utils import timezone
 
