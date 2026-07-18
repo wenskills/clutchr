@@ -1,17 +1,5 @@
 """
-Connecteur Adzuna — source d'offres réellement fonctionnelle (API publique
-gratuite, couverture France incluse).
-
-Indeed (API de recherche dépréciée, accès partenaire ATS uniquement) et
-Glassdoor (aucune API publique, anti-bot agressif) ne sont PAS viables
-pour ce cas d'usage en l'état — voir notes dans scrapers/base.py.
-Adzuna sert de source par défaut tant qu'une autre intégration partenaire
-n'est pas disponible.
-
-Configuration requise (.env) :
-    ADZUNA_APP_ID=...
-    ADZUNA_APP_KEY=...
-Inscription gratuite : https://developer.adzuna.com/
+Connecteur Adzuna source d'offres
 """
 import logging
 from datetime import datetime, timezone
@@ -44,9 +32,7 @@ class AdzunaScraper(BaseJobScraper):
         return bool(self.app_id and self.app_key)
 
     # Adzuna ne distingue pas Alternance/Stage/Freelance — seulement
-    # CDI ("permanent") et CDD ("contract"). Les autres valeurs de
-    # contract_type sont ignorées ici plutôt que mappées à un paramètre
-    # incorrect.
+    # CDI ("permanent") et CDD ("contract")
     ADZUNA_CONTRACT_MAP = {'cdi': 'permanent', 'cdd': 'contract'}
 
     def search(self, query: str, location: str = '', results_limit: int = 50, page: int = 1,
@@ -61,15 +47,8 @@ class AdzunaScraper(BaseJobScraper):
             'what': query,
             'results_per_page': min(results_limit, self.MAX_RESULTS_PER_PAGE),
             'content-type': 'application/json',
-            # Sans ce paramètre, Adzuna trie par pertinence par défaut —
-            # revisiter la page 1 après épuisement du curseur montrerait
-            # alors toujours le même classement, jamais les offres les
-            # plus récentes (même correctif que sort=1 pour France Travail).
             'sort_by': 'date',
         }
-        # "France", "Partout", etc. veulent dire "pas de lieu précis" —
-        # les passer tels quels à Adzuna restreint inutilement la recherche
-        # (même correctif que pour France Travail).
         if location and not is_nationwide_placeholder(location):
             params['where'] = location
 
