@@ -1,10 +1,6 @@
 """
 Orchestration : interroge les sources actives pour le profil donné,
 enregistre les offres, calcule les correspondances.
-
-Conçu pour être appelé soit directement depuis une vue DRF (test immédiat,
-sans Celery/Redis), soit plus tard depuis une tâche Celery planifiée
-(jobs/tasks.py) sans aucun changement de cette fonction.
 """
 import logging
 
@@ -17,11 +13,6 @@ from jobs.matching import extract_job_skills, compute_match
 
 logger = logging.getLogger(__name__)
 
-# Budget d'appels API HTTP par lancement (toutes pages/combinaisons
-# confondues). Quota gratuit Adzuna confirmé : 25/min, 250/jour, 1000/semaine,
-# 2500/mois. À 20 appels par lancement, on reste très confortable même avec
-# plusieurs lancements automatiques par jour (voir management command
-# `run_scraping` + crontab pour la planification).
 MAX_API_CALLS_PER_RUN = 20
 RESULTS_PER_PAGE = 50
 MAX_PAGES_PER_QUERY = 2  # jusqu'à 100 offres par combinaison poste x lieu, par lancement
@@ -45,16 +36,6 @@ def run_scrape_for_profile(profile) -> dict:
     postes et lieux ciblés (dans la limite du budget d'appels API), avec
     pagination, puis (re)calcule les JobMatch correspondants.
 
-    Chaque source garde en mémoire (ScrapeCursor) la page où elle s'est
-    arrêtée la dernière fois : un nouveau lancement avance dans les
-    résultats au lieu de toujours redemander les mêmes premiers — sauf
-    si la source a été entièrement épuisée, auquel cas on recommence à
-    la page 1 (pour capter les nouvelles offres publiées depuis).
-
-    Renvoie un résumé incluant `total_available_on_source` : le nombre
-    RÉEL d'offres que la source a pour ces recherches (toutes pages
-    confondues), pour que l'écart avec ce qu'on importe soit transparent
-    plutôt que silencieux.
     """
     summary = {
         'configured': False,
@@ -93,9 +74,7 @@ def run_scrape_for_profile(profile) -> dict:
         return summary
 
     summary['configured'] = True
-    # Budget réparti équitablement entre sources actives, pour qu'une
-    # source listée en premier (Adzuna) ne consomme pas tout le quota
-    # avant qu'une autre (France Travail) ait pu être interrogée.
+
     budget_per_scraper = max(MAX_API_CALLS_PER_RUN // len(configured_scrapers), 1)
 
     for scraper in configured_scrapers:
@@ -108,10 +87,6 @@ def run_scrape_for_profile(profile) -> dict:
             if calls_used >= budget_per_scraper or summary['rate_limited']:
                 break
 
-            # Curseur PAR COMBINAISON poste+lieu, pas partagé entre toutes
-            # les requêtes : avec des recherches de niche (peu de résultats
-            # par combinaison), une seule combinaison épuisée ne doit pas
-            # remettre à zéro le curseur des autres combinaisons.
             query_key = f"{role}|{location}".lower().strip()
             cursor, _ = ScrapeCursor.objects.get_or_create(
                 user=profile, source=scraper.source_name, query_key=query_key,
@@ -149,9 +124,6 @@ def run_scrape_for_profile(profile) -> dict:
                     if not nj.get('source_id') or not nj.get('job_url'):
                         continue
 
-                    # Si la source fournit déjà des compétences structurées
-                    # (France Travail), on les garde — sinon on retombe sur
-                    # l'extraction générique depuis la description (Adzuna).
                     provided_skills = nj.get('required_skills') or []
                     required_skills = provided_skills if provided_skills else extract_job_skills(nj.get('description', ''))
                     posted_date = parse_datetime(nj.get('posted_date', '')) or timezone.now()
@@ -185,7 +157,6 @@ def run_scrape_for_profile(profile) -> dict:
                     else:
                         summary['updated_jobs'] += 1
 
-                # Si cette page a renvoyé moins que le plafond, il n'y a pas de page suivante.
                 if len(normalized_jobs) < RESULTS_PER_PAGE:
                     exhausted_for_combo = True
                     break
@@ -199,9 +170,6 @@ def run_scrape_for_profile(profile) -> dict:
                 'page_start': start_page,
             })
 
-            # Avance le curseur de CETTE combinaison, ou repart à la page 1
-            # si elle est épuisée (le tri par date côté API fera apparaître
-            # les offres les plus récentes à la prochaine visite de la page 1).
             cursor.next_page = 1 if exhausted_for_combo else start_page + MAX_PAGES_PER_QUERY
             cursor.save()
 
@@ -228,9 +196,6 @@ def run_scrape_for_profile(profile) -> dict:
         else:
             summary['matches_updated'] += 1
 
-    # Capture le point du jour pour le Career Pulse et les tendances de
-    # compétences — idempotent, alimente l'historique même si l'utilisateur
-    # ne consulte pas le tableau de bord (utile avec le scraping planifié).
     from jobs.snapshots import capture_pulse_snapshot, capture_skill_trend_snapshots
     capture_pulse_snapshot(profile)
     capture_skill_trend_snapshots(profile)

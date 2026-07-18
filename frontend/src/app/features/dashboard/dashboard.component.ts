@@ -34,10 +34,7 @@ const PRIORITY_ICONS: Record<string, string> = {
   network: 'users',
 };
 
-/**
- * Tableau de bord décisionnel — chaque élément répond à "qu'est-ce que
- * je fais aujourd'hui ?".
- */
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -486,7 +483,7 @@ export class DashboardComponent implements OnInit {
   }
 
   togglePriority(p: Priority) {
-    if (p.completed) return; // pas de "décocher" — la priorité disparaît demain naturellement
+    if (p.completed) return; 
     p.completed = true;
     this.http.post(`${this.apiUrl}/profile/complete-priority/`, { action_type: p.type }).subscribe({
       error: () => { p.completed = false; }

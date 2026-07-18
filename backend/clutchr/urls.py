@@ -15,7 +15,6 @@ from jobs.views import (
     NotificationViewSet, LinkedInPostViewSet
 )
 
-# Create router and register viewsets
 router = DefaultRouter()
 router.register(r'profile', UserProfileViewSet, basename='profile')
 router.register(r'matches', JobMatchViewSet, basename='match')
@@ -50,7 +49,7 @@ urlpatterns = [
     path('api/v1/auth/change-email/', AuthViewSet.as_view({'post': 'change_email'}), name='change-email'),
     path('api/v1/auth/change-password/', AuthViewSet.as_view({'post': 'change_password'}), name='change-password'),
     
-    # Token auth (alternative)
+    # Token auth
     path('api-token-auth/', obtain_auth_token),
     
     # API Documentation
@@ -58,7 +57,6 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
 ]
 
-# Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

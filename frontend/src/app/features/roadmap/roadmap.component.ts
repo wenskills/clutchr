@@ -30,8 +30,7 @@ interface SimulationResult {
 /**
  * Feuille de route d'apprentissage — générée par Gemini à partir des
  * compétences du profil, des lacunes détectées dans les offres déjà
- * collectées, et des tendances tech GitHub. Le simulateur recalcule le
- * matching sur vos vraies offres collectées, sans rien deviner.
+ * collectées, et des tendances tech GitHub.
  */
 @Component({
   selector: 'app-roadmap',
@@ -264,8 +263,6 @@ export class RoadmapComponent implements OnInit {
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   ngOnInit() {
-    // Pas de génération automatique à l'arrivée — chaque appel a un coût
-    // (Gemini), on laisse l'utilisateur cliquer explicitement.
   }
 
   targetRole = '';

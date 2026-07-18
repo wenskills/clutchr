@@ -1,25 +1,9 @@
-"""
-Service de snapshots — fondation du tableau de bord décisionnel.
 
-Toute métrique présentée comme une évolution dans le temps ("+4 cette
-semaine", "Kubernetes +23%") doit reposer sur une valeur réellement
-enregistrée à une date passée, jamais sur une estimation arbitraire.
-Ce module calcule et persiste un point par jour et par utilisateur ;
-la comparaison entre deux points devient alors un fait, pas une
-supposition.
-
-Idempotence : appeler plusieurs fois dans la même journée met juste à
-jour le point du jour (update_or_create sur la date), ça n'en crée
-jamais plusieurs.
-"""
 from django.db import models as django_models
 from django.utils import timezone
 
 from jobs.models import CareerPulseSnapshot, SkillTrendSnapshot, JobMatch, CompanyContact
 
-# Poids de la pondération du Career Pulse. Toujours redistribués sur les
-# composantes réellement calculables — jamais de composante comptée à 0
-# faute de donnée (voir compute_career_pulse).
 PULSE_WEIGHTS = {
     'employability': 0.30,   # qualité moyenne des correspondances
     'skills': 0.20,          # compétences détectées sur le profil
@@ -64,21 +48,10 @@ def _documents_score(profile) -> float:
 
 
 def _visibility_score(profile) -> float | None:
-    """
-    Réservé au module Contenu LinkedIn une fois l'historique des posts
-    analysés mis en place (non disponible aujourd'hui : les analyses ne
-    sont pas encore sauvegardées). Renvoie None tant que la donnée
-    n'existe pas, plutôt qu'un chiffre arbitraire.
-    """
     return None
 
 
 def compute_career_pulse(profile) -> dict:
-    """
-    Calcule le Career Pulse et son détail par composante. Une composante
-    sans donnée suffisante est retirée du calcul et son poids redistribué
-    sur les composantes disponibles — jamais comptée comme 0.
-    """
     raw_scores = {
         'employability': _employability_score(profile),
         'skills': _skills_score(profile),
@@ -216,12 +189,6 @@ def get_employability_delta(profile, days_ago: int = 7) -> float | None:
 
 
 def get_skill_trend_deltas(profile, days_ago: int = 30, limit: int = 10) -> list:
-    """
-    Compétences dont la présence (%) a le plus évolué sur la période,
-    calculée à partir de deux points réellement enregistrés. Une
-    compétence sans point assez ancien pour comparer est exclue plutôt
-    que de lui attribuer une évolution inventée.
-    """
     today = timezone.now().date()
     target_date = today - timezone.timedelta(days=days_ago)
 
@@ -252,12 +219,6 @@ def get_skill_trend_deltas(profile, days_ago: int = 30, limit: int = 10) -> list
 
 
 def pulse_state_label(delta_7d) -> dict:
-    """
-    Traduit le delta de Pulse en état qualitatif, pour afficher
-    "Stable" / "En accélération" plutôt qu'un simple pourcentage brut.
-    Reste honnête : si l'historique est insuffisant (delta_7d=None),
-    l'état l'indique clairement plutôt que d'inventer une tendance.
-    """
     if delta_7d is None:
         return {'state': 'demarrage', 'label': 'Démarrage'}
     if delta_7d > 2:

@@ -285,8 +285,6 @@ export class ProfileImportComponent {
     roles.forEach(r => formData.append('target_roles', r));
     locations.forEach(l => formData.append('target_locations', l));
     formData.append('years_experience', String(this.yearsExperience ?? 0));
-
-    // Petite mise en scène de l'analyse (lecture -> extraction -> création)
     const tick2 = setTimeout(() => this.analyzeStep.set(2), 600);
     const tick3 = setTimeout(() => this.analyzeStep.set(3), 1300);
 
@@ -299,10 +297,6 @@ export class ProfileImportComponent {
           this.analyzing.set(false);
           this.done.set(true);
           this.searchingOffers.set(true);
-
-          // Lance une première recherche automatiquement : l'utilisateur
-          // arrive directement sur des offres plutôt que sur un tableau
-          // de bord vide nécessitant un clic pour voir le moindre résultat.
           this.http.post(`${this.apiUrl}/matches/scrape/`, {}).subscribe({
             next: () => this.router.navigate(['/offres'], { queryParams: { vue: 'swipe' } }),
             error: () => this.router.navigate(['/offres'], { queryParams: { vue: 'swipe' } }),

@@ -22,8 +22,7 @@ const DAYS = [
 /**
  * Calendrier éditorial (posts sauvegardés assignés à un jour de la
  * semaine) + Content Gap (compétences jamais abordées dans aucun
- * post). Aucune publication automatique — c'est un outil de
- * planification personnelle, pas une intégration LinkedIn.
+ * post)
  */
 @Component({
   selector: 'app-linkedin-calendar',

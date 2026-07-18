@@ -5,20 +5,8 @@ Lance la recherche d'offres pour tous les profils complets (postes ciblés
 renseignés), un par un, avec gestion propre du quota et des erreurs
 individuelles (un profil qui échoue n'arrête pas les autres).
 
-Usage manuel :
-    python manage.py run_scraping
-
 Planification (cron, Linux/Mac) — 3 fois par jour à 8h, 13h, 19h :
     0 8,13,19 * * * cd /chemin/vers/backend && /chemin/vers/venv/bin/python manage.py run_scraping >> /chemin/vers/logs/scraping.log 2>&1
-
-Sur Windows : utiliser le Planificateur de tâches, action
-"python.exe" avec arguments "manage.py run_scraping" et répertoire
-de démarrage pointant vers le dossier backend.
-
-Avec le budget actuel (~20 appels API par profil et par lancement) et
-le quota gratuit Adzuna confirmé (250 appels/jour), 3 lancements par
-jour pour un seul profil consomment ~60 appels/jour — large marge.
-Si vous avez plusieurs profils utilisateurs, surveillez le total.
 """
 import logging
 

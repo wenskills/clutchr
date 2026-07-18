@@ -12,7 +12,7 @@ interface TechTrend { full_name: string; description: string; language: string; 
  * Veille & Tendances — deux sources distinctes :
  * - "Tendances pour vous" : présence réelle des compétences dans VOS
  *   offres déjà collectées (pas une fausse tendance % inventée).
- * - "Tendances tech (GitHub Trending)" : scraping HTML réel.
+ * - "Tendances tech (GitHub Trending)" : scraping HTML
  */
 @Component({
   selector: 'app-trends',

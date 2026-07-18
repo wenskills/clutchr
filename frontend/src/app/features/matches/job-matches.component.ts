@@ -39,7 +39,7 @@ const SWIPE_THRESHOLD = 110;
 const CLICK_MOVE_TOLERANCE = 8;
 
 /**
- * Offres correspondantes — un seul écran, deux modes d'affichage
+ * Deux modes d'affichage
  * (Liste / Swipe).
  */
 @Component({
@@ -569,7 +569,6 @@ export class JobMatchesComponent implements OnInit {
   private dragY = signal(0);
   private activePointerId: number | null = null;
 
-  // --- Gamification légère (session en cours, non persistée) ---
   sessionExplored = signal(0);
 
   constructor(private http: HttpClient, private auth: AuthService, private route: ActivatedRoute, private notify: NotifyService) {}
@@ -730,10 +729,6 @@ export class JobMatchesComponent implements OnInit {
     return (name || '?').trim().slice(0, 2).toUpperCase();
   }
 
-  /**
-   * Couleur d'avatar déterministe par entreprise, utilisée en repli
-   * si aucun logo réel n'est trouvé.
-   */
   avatarColor(companyName: string): string {
     // Restreint à la palette de marque (violet/rose), plus de couleurs
     // arc-en-ciel qui sortaient de la DA de l'app.
@@ -745,16 +740,6 @@ export class JobMatchesComponent implements OnInit {
 
   logoFailed = new Set<number>();
 
-  /**
-   * Tente un vrai logo via favicon.im, à partir d'un domaine deviné
-   * (nom d'entreprise -> nom.com). Contrairement au service de
-   * favicons de Google (essayé avant, abandonné), favicon.im renvoie
-   * une vraie erreur 404 sur domaine inconnu quand on demande
-   * throw-error-on-404=true — donc le repli vers l'avatar coloré se
-   * déclenche réellement, au lieu de toujours afficher une icône
-   * "globe" générique. Reste un essai au mieux : beaucoup d'entreprises
-   * n'ont pas le domaine deviné exact.
-   */
   logoUrlFor(companyName: string): string {
     const guessedDomain = (companyName || '')
       .toLowerCase()
@@ -767,7 +752,6 @@ export class JobMatchesComponent implements OnInit {
     this.logoFailed.add(matchId);
   }
 
-  /** Couleur de chip déterministe par compétence, pour casser la monotonie visuelle. */
   private skillPalette = [
     { bg: '#ECFDF5', fg: '#0D9488' },
     { bg: '#EFF6FF', fg: '#1D4ED8' },
@@ -797,7 +781,6 @@ export class JobMatchesComponent implements OnInit {
     return colors[level] || '#7C5CFF';
   }
 
-  /** Décision rapide depuis la liste, sans passer par la pile swipe. */
   quickDecide(m: JobMatchVM, status: 'interesse' | 'pas_interesse', event: MouseEvent) {
     event.stopPropagation();
     const previousStatus = m.kanban_status;
@@ -808,8 +791,6 @@ export class JobMatchesComponent implements OnInit {
   }
 
   dotsWindow(): number[] {
-    // Affiche au plus 5 points autour de la position actuelle, pour ne pas
-    // étaler 50 points sur l'écran quand la pile est longue.
     const total = this.deck().length;
     const current = this.deckIndex();
     const windowSize = 5;
@@ -863,7 +844,6 @@ export class JobMatchesComponent implements OnInit {
     } else if (finalX < -SWIPE_THRESHOLD) {
       this.flyOutAndDecide('pas_interesse', -1);
     } else if (this.maxMove < CLICK_MOVE_TOLERANCE) {
-      // Geste sans déplacement significatif : c'est un clic, pas un balayage.
       const card = this.currentCard();
       if (card) window.open(card.job.job_url, '_blank', 'noopener');
       this.dragX.set(0);

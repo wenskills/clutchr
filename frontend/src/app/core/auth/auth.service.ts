@@ -48,11 +48,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Seconde étape de connexion quand la 2FA est activée — échange le
-   * jeton temporaire (renvoyé par login() via requires_2fa) contre le
-   * vrai jeton d'accès, à condition que le code soit valide.
-   */
   confirmTwoFactorLogin(pendingToken: string, code: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/2fa-login/`, {
       pending_token: pendingToken, code
@@ -63,9 +58,6 @@ export class AuthService {
 
   /**
    * Connexion via Google Identity Services.
-   * `idToken` est le credential JWT renvoyé par le bouton Google.
-   * Nécessite que GOOGLE_CLIENT_ID soit configuré côté backend, sinon
-   * une erreur explicite est renvoyée par l'API.
    */
   loginWithGoogle(idToken: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/google/`, { id_token: idToken }).pipe(

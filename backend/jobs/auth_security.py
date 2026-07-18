@@ -1,14 +1,5 @@
 """
-Authentification à deux facteurs — TOTP (RFC 6238), compatible avec
-Google Authenticator, Authy, 1Password, etc. Aucune dépendance à un
-service tiers : tout est calculé localement à partir du secret partagé.
-
-Flux de connexion à deux facteurs : le login standard (AuthViewSet.login)
-ne renvoie pas directement le jeton d'accès si la 2FA est activée — il
-renvoie un jeton temporaire signé (15 minutes), à échanger contre le
-vrai jeton via /auth/2fa/login/ avec un code TOTP valide. Aucun
-nouveau modèle de "session en attente" n'est nécessaire : le jeton
-temporaire est auto-suffisant (signé, avec expiration intégrée).
+Authentification à deux facteurs
 """
 import io
 import secrets

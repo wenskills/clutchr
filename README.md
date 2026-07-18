@@ -2,6 +2,8 @@
 
 # Clutchr
 
+*(renommé Pulzr)*
+
 **Copilote de recherche d'emploi**
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
@@ -237,6 +239,9 @@ GEMINI_MODEL=gemini-2.5-flash
 
 # Auth sociale (optionnel)
 GOOGLE_CLIENT_ID=
+LINKEDIN_CLIENT_ID=
+LINKEDIN_CLIENT_SECRET=
+LINKEDIN_REDIRECT_URI=
 
 # Ressources d'apprentissage
 YOUTUBE_API_KEY=

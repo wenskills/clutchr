@@ -1,6 +1,5 @@
 """
-Résolution nom de ville -> code commune INSEE, via l'API officielle
-gratuite geo.api.gouv.fr (zéro authentification, zéro inscription).
+Résolution nom de ville -> code commune INSEE.
 """
 import logging
 
@@ -10,17 +9,10 @@ logger = logging.getLogger(__name__)
 
 COMMUNES_URL = "https://geo.api.gouv.fr/communes"
 
-# Cache mémoire simple (process-local) : pas besoin de re-résoudre la
-# même ville à chaque appel dans un même cycle de scraping.
 _commune_code_cache: dict = {}
 
 
 def resolve_commune_code(city_name: str) -> str | None:
-    """
-    Renvoie le code INSEE de la commune la plus probable pour ce nom,
-    ou None si introuvable/ambigu. Ne lève jamais d'exception côté
-    appelant : une erreur réseau renvoie simplement None.
-    """
     if not city_name or not city_name.strip():
         return None
 

@@ -1,5 +1,5 @@
 """
-REST API views for Clutchr
+REST API views Clutchr
 """
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -13,6 +13,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
+from django.core.files.base import ContentFile
+import requests
 from django.conf import settings
 from django.utils import timezone
 from django.db import models
@@ -412,6 +414,68 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def me(self, request):
         """Get current user's profile"""
         profile = self.get_object()
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], url_path='sync-linkedin-photo')
+    def sync_linkedin_photo(self, request):
+        """
+        Récupère la photo de profil LinkedIn via Sign In with LinkedIn
+        (OpenID Connect, produit gratuit) et la sauvegarde comme avatar.
+        Reçoit le `code` d'autorisation renvoyé par LinkedIn sur la
+        redirection. Ne renvoie AUCUN titre/headline : ce scope n'existe
+        plus sur l'offre gratuite depuis 2015, seuls id/nom/photo/email
+        sont disponibles sans accès partenaire payant.
+        """
+        code = request.data.get('code', '')
+        if not code:
+            return Response({'error': 'code manquant.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        client_id = getattr(settings, 'LINKEDIN_CLIENT_ID', '')
+        client_secret = getattr(settings, 'LINKEDIN_CLIENT_SECRET', '')
+        redirect_uri = getattr(settings, 'LINKEDIN_REDIRECT_URI', '')
+        if not client_id or not client_secret:
+            return Response(
+                {'error': "Connexion LinkedIn non configurée côté serveur (LINKEDIN_CLIENT_ID / LINKEDIN_CLIENT_SECRET manquants dans .env)."},
+                status=status.HTTP_501_NOT_IMPLEMENTED
+            )
+
+        token_resp = requests.post(
+            'https://www.linkedin.com/oauth/v2/accessToken',
+            data={
+                'grant_type': 'authorization_code',
+                'code': code,
+                'redirect_uri': redirect_uri,
+                'client_id': client_id,
+                'client_secret': client_secret,
+            },
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        )
+        if not token_resp.ok:
+            return Response({'error': "Échange du code LinkedIn refusé."}, status=status.HTTP_401_UNAUTHORIZED)
+        access_token = token_resp.json().get('access_token', '')
+
+        userinfo_resp = requests.get(
+            'https://api.linkedin.com/v2/userinfo',
+            headers={'Authorization': f'Bearer {access_token}'},
+        )
+        if not userinfo_resp.ok:
+            return Response({'error': "Impossible de récupérer le profil LinkedIn."}, status=status.HTTP_400_BAD_REQUEST)
+        picture_url = userinfo_resp.json().get('picture', '')
+        if not picture_url:
+            return Response({'error': "Aucune photo trouvée sur ce compte LinkedIn."}, status=status.HTTP_404_NOT_FOUND)
+
+        image_resp = requests.get(picture_url)
+        if not image_resp.ok:
+            return Response({'error': "Téléchargement de la photo LinkedIn échoué."}, status=status.HTTP_502_BAD_GATEWAY)
+
+        profile = self.get_object()
+        profile.avatar.save(
+            f'linkedin_{profile.user_id}.jpg',
+            ContentFile(image_resp.content),
+            save=True,
+        )
+
         serializer = self.get_serializer(profile)
         return Response(serializer.data)
 

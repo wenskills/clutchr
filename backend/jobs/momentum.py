@@ -1,16 +1,7 @@
 """
 Momentum — la vitesse à laquelle la carrière avance, distincte du
 Career Pulse (qui mesure l'état du profil et son adéquation au
-marché, pas l'activité récente).
-
-Aucun des axes actuels du Pulse (employabilité, compétences, réseau,
-documents, visibilité) ne répond directement à "j'ai postulé
-aujourd'hui" ou "j'ai contacté un recruteur" — ce sont des mesures de
-qualité de profil, pas d'activité. Plutôt que d'inventer un faux delta
-de Pulse pour ces actions, Momentum les mesure honnêtement, à part.
-
-Calculé uniquement à partir d'événements réels horodatés. Pas de
-points fabriqués, pas de combo, pas de série à entretenir par culpabilité.
+marché).
 """
 from datetime import timedelta
 

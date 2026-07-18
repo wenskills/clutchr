@@ -7,7 +7,6 @@ from decouple import config, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
@@ -27,7 +26,6 @@ INSTALLED_APPS = [
     'jobs',
 ]
 
-# Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -60,7 +58,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'clutchr.wsgi.application'
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -72,14 +69,13 @@ DATABASES = {
     }
 }
 
-# Fallback to SQLite for local development without Docker
+# Fallback to SQLite
 if config('USE_SQLITE', default=True, cast=bool):
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -97,8 +93,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Manifest storage requires collectstatic to have run (production only).
-# In dev (DEBUG=True), use plain static storage so /admin/ works immediately.
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -119,7 +113,6 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# CORS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
@@ -127,27 +120,25 @@ CORS_ALLOWED_ORIGINS = config(
     cast=Csv()
 )
 
-# Frontend URL (used to build links inside emails, e.g. reset password)
+
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:4200')
 
-# E-mail : en dev, les e-mails s'affichent dans la console du serveur Django
-# (aucun service d'envoi réel n'est configuré).
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='no-reply@clutchr.app')
 
-# Google Sign-In (Identity Services). Laisser vide désactive proprement
-# le bouton Google côté frontend (message explicatif au lieu d'une erreur).
+
 GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
 
-# Recherche d'offres — Adzuna (API publique gratuite, inscription sur
-# https://developer.adzuna.com/). Indeed (API de recherche dépréciée) et
-# Glassdoor (pas d'API publique).
+
+LINKEDIN_CLIENT_ID = config('LINKEDIN_CLIENT_ID', default='')
+LINKEDIN_CLIENT_SECRET = config('LINKEDIN_CLIENT_SECRET', default='')
+LINKEDIN_REDIRECT_URI = config('LINKEDIN_REDIRECT_URI', default='http://localhost:4200/profil')
+
+# Recherche d'offres
 ADZUNA_APP_ID = config('ADZUNA_APP_ID', default='')
 ADZUNA_APP_KEY = config('ADZUNA_APP_KEY', default='')
 ADZUNA_COUNTRY = config('ADZUNA_COUNTRY', default='fr')
 
-# Deuxième source d'offres — France Travail (officiel, OAuth2).
-# Inscription gratuite : https://francetravail.io/inscription
 FRANCETRAVAIL_CLIENT_ID = config('FRANCETRAVAIL_CLIENT_ID', default='')
 FRANCETRAVAIL_CLIENT_SECRET = config('FRANCETRAVAIL_CLIENT_SECRET', default='')
 
@@ -155,18 +146,15 @@ FRANCETRAVAIL_CLIENT_SECRET = config('FRANCETRAVAIL_CLIENT_SECRET', default='')
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-2.5-flash')
 
-# Ressources vidéo de la Roadmap — YouTube Data API v3 (gratuite, API
-# officielle, pas de scraping)
+# Ressources vidéo
 YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', default='')
 
-# Security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
 
-# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

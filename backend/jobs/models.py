@@ -1,5 +1,5 @@
 """
-Models for Clutchr job matching platform
+Modèles Clutchr
 """
 from django.db import models
 from django.contrib.auth.models import User
@@ -7,11 +7,10 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class UserProfile(models.Model):
-    """Extended user profile with Clutchr-specific data"""
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     
-    # Profile data
+    # Profil data
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
     phone = models.CharField(max_length=20, blank=True)
@@ -20,24 +19,14 @@ class UserProfile(models.Model):
     linkedin_text = models.TextField(blank=True, help_text="Extracted from LinkedIn PDF export")
     cv_text = models.TextField(blank=True, help_text="Extracted from CV/resume PDF")
 
-    # Fichiers PDF d'origine, conservés pour l'aperçu réel dans l'interface.
-    # Le chemin de stockage n'est jamais exposé directement au frontend :
-    # ces fichiers sont servis via un endpoint authentifié qui vérifie la
-    # propriété du profil (voir UserProfileViewSet.document), jamais via
-    # l'URL MEDIA statique brute.
     linkedin_pdf_file = models.FileField(upload_to='profile_documents/linkedin/', null=True, blank=True)
     cv_pdf_file = models.FileField(upload_to='profile_documents/cv/', null=True, blank=True)
 
-    # Profil structuré (titre, résumé, expériences, formations) généré
-    # par analyse du texte extrait. Modifiable manuellement ensuite —
-    # ce champ représente la version éditée par l'utilisateur, pas
-    # nécessairement la sortie brute de la dernière analyse.
     structured_profile = models.JSONField(default=dict, blank=True)
     
-    # Parsed skills (as JSON)
     extracted_skills = models.JSONField(default=dict, help_text="{'Python': 5, 'Django': 3}")
     
-    # Preferences
+    # Préférences
     target_roles = models.JSONField(default=list, help_text="['Python Developer', 'Backend Engineer']")
     target_locations = models.JSONField(default=list, help_text="['Paris', 'Lyon', 'Remote']")
     industries = models.JSONField(default=list, help_text="['Tech', 'Fintech']")
@@ -73,14 +62,12 @@ class UserProfile(models.Model):
     ]
     remote_preference = models.CharField(max_length=20, choices=REMOTE_PREFERENCE_CHOICES, blank=True, default='')
 
-    # Settings
     notify_new_matches = models.BooleanField(default=True)
     notify_trending_skills = models.BooleanField(default=True)
     notify_interview_offers = models.BooleanField(
         default=True, help_text="Notifie lors d'un passage en statut Entretien ou Offre reçue"
     )
-    
-    # Metadata
+   
     profile_complete = models.BooleanField(default=False)
     last_analyzed = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -96,7 +83,6 @@ class UserProfile(models.Model):
         return f"{self.user.get_full_name() or self.user.username} Profile"
     
     def is_profile_complete(self):
-        """Check if profile has minimum required data"""
         return bool(
             self.extracted_skills and
             self.target_roles and
@@ -105,7 +91,6 @@ class UserProfile(models.Model):
 
 
 class JobListing(models.Model):
-    """Job postings scraped from job boards"""
     
     SOURCE_CHOICES = [
         ('adzuna', 'Adzuna'),
@@ -129,24 +114,19 @@ class JobListing(models.Model):
         default='unknown'
     )
     
-    # Full description & metadata
     description = models.TextField()
     required_skills = models.JSONField(default=list, help_text="['Python', 'Django', 'PostgreSQL']")
     
-    # Compensation
     salary_min = models.IntegerField(null=True, blank=True)
     salary_max = models.IntegerField(null=True, blank=True)
     currency = models.CharField(max_length=3, default='EUR')
     
-    # Links
     job_url = models.URLField()
     company_url = models.URLField(blank=True)
     
-    # Timestamps
     posted_date = models.DateTimeField()
     scraped_date = models.DateTimeField(auto_now_add=True)
     
-    # Status
     is_active = models.BooleanField(default=True)
     
     class Meta:
@@ -168,7 +148,6 @@ class JobListing(models.Model):
 
 
 class JobMatch(models.Model):
-    """Matching between user profile and job"""
     
     MATCH_LEVEL_CHOICES = [
         ('perfect', 'Perfect Match (90%+)'),
@@ -178,9 +157,6 @@ class JobMatch(models.Model):
         ('low', 'Low Match (<50%)'),
     ]
 
-    # Statuts du suivi de candidature (Kanban). 'nouveau' est l'état par
-    # défaut d'un match qui vient d'être calculé — il ne représente pas
-    # encore une décision de l'utilisateur.
     KANBAN_STATUS_CHOICES = [
         ('nouveau', 'Nouveau'),
         ('pas_interesse', 'Pas intéressé'),
@@ -202,23 +178,20 @@ class JobMatch(models.Model):
     )
     match_level = models.CharField(max_length=20, choices=MATCH_LEVEL_CHOICES)
     
-    # Score breakdown
     skill_match_score = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(100)])
     location_fit = models.CharField(max_length=50, default='unknown')
     salary_fit = models.CharField(max_length=50, default='unknown')
     experience_fit = models.CharField(max_length=50, default='unknown')
     
-    # Skill analysis
     matched_skills = models.JSONField(default=dict, help_text="{'Python': True, 'Django': True}")
     skill_gaps = models.JSONField(default=dict, help_text="{'Kubernetes': False, 'AWS': False}")
     skill_gaps_count = models.IntegerField(default=0)
     
-    # Metadata
     is_notified = models.BooleanField(default=False)
     user_saved = models.BooleanField(default=False)
     user_applied = models.BooleanField(default=False)
 
-    # Suivi de candidature (Kanban)
+    # Suivi de candidature
     kanban_status = models.CharField(max_length=20, choices=KANBAN_STATUS_CHOICES, default='nouveau')
     notes = models.TextField(blank=True, max_length=3000)
     status_updated_at = models.DateTimeField(null=True, blank=True)
@@ -231,7 +204,6 @@ class JobMatch(models.Model):
         help_text="Étiquettes libres façon GitLab : [{'name': 'Urgent', 'color': '#F59E0B'}]"
     )
     
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -248,19 +220,15 @@ class JobMatch(models.Model):
 
 
 class SkillDemand(models.Model):
-    """Track skill demand across job market"""
     
     skill = models.CharField(max_length=255, unique=True)
     
-    # Frequency stats
     frequency = models.FloatField(default=0, help_text="% of jobs requiring this")
     trend = models.FloatField(default=0, help_text="YoY change %")
     
-    # Career info
     avg_salary_impact = models.IntegerField(null=True, blank=True, help_text="€ salary boost")
     related_skills = models.JSONField(default=list, help_text="['Django', 'FastAPI', 'SQLAlchemy']")
     
-    # Meta
     last_updated = models.DateTimeField(auto_now=True)
     
     class Meta:
@@ -275,7 +243,6 @@ class SkillDemand(models.Model):
 
 
 class TrendSnapshot(models.Model):
-    """Daily snapshot of market trends"""
     
     date = models.DateField(auto_now_add=True)
     role = models.CharField(max_length=255)
@@ -291,7 +258,6 @@ class TrendSnapshot(models.Model):
         help_text="[{'name': 'Stripe', 'hiring_velocity': 10}]"
     )
     
-    # Aggregate stats
     total_jobs = models.IntegerField(default=0)
     avg_salary = models.IntegerField(default=0)
     emerging_skills = models.JSONField(default=list, help_text="Skills with trend > 10%")
@@ -308,14 +274,7 @@ class TrendSnapshot(models.Model):
 
 
 class JobMatchStatusEvent(models.Model):
-    """
-    Trace chaque changement de statut d'une candidature. Sans cet
-    historique, une candidature passée par "Entretien" puis "Refusé"
-    perdrait la preuve qu'elle a un jour atteint l'entretien — ce qui
-    rendrait les statistiques de pipeline (taux de réponse, délai
-    moyen) fausses. Jamais modifié après création, jamais supprimé
-    individuellement (purgé uniquement avec la candidature parente).
-    """
+    
     match = models.ForeignKey(JobMatch, on_delete=models.CASCADE, related_name='status_events')
     from_status = models.CharField(max_length=20)
     to_status = models.CharField(max_length=20)
@@ -332,13 +291,6 @@ class JobMatchStatusEvent(models.Model):
 
 
 class CompanyContact(models.Model):
-    """
-    Suivi des entreprises à approcher pour du contact direct (recruteur,
-    talent acquisition, RH...). Aucune donnée de personne n'est stockée
-    ni scrapée ici : Clutchr génère uniquement un lien de recherche
-    LinkedIn pré-rempli ; l'utilisateur navigue et contacte lui-même,
-    depuis son propre compte.
-    """
 
     STATUS_CHOICES = [
         ('a_contacter', 'À contacter'),
@@ -352,8 +304,6 @@ class CompanyContact(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='a_contacter')
     notes = models.TextField(blank=True, max_length=2000)
 
-    # Offre qui a fait découvrir cette entreprise (optionnel, peut être null
-    # si l'entreprise a été ajoutée manuellement)
     source_job = models.ForeignKey(
         JobListing, on_delete=models.SET_NULL, null=True, blank=True, related_name='contacts'
     )
@@ -373,13 +323,6 @@ class CompanyContact(models.Model):
 
 
 class Contact(models.Model):
-    """
-    Personne individuelle identifiée chez une entreprise suivie (vs
-    CompanyContact, qui ne suit que la décision d'approcher l'entreprise
-    elle-même). Aucune donnée n'est jamais générée automatiquement ici :
-    chaque contact est saisi manuellement par l'utilisateur après une
-    recherche LinkedIn — Clutchr ne scrape jamais de profils.
-    """
 
     STATUS_CHOICES = [
         ('a_trouver', 'À trouver'),
@@ -414,12 +357,7 @@ class Contact(models.Model):
 
 
 class TechTrend(models.Model):
-    """
-    Dépôts tendance GitHub (scraping HTML — voir scrapers/github_trending.py).
-    Rafraîchi périodiquement, pas de lien direct avec un utilisateur :
-    c'est une donnée de marché générale.
-    """
-
+    
     rank = models.IntegerField()
     owner = models.CharField(max_length=255)
     repo_name = models.CharField(max_length=255)
@@ -441,17 +379,7 @@ class TechTrend(models.Model):
 
 
 class ScrapeCursor(models.Model):
-    """
-    Mémorise où en est chaque utilisateur dans les résultats de chaque
-    source POUR CHAQUE combinaison poste+lieu, pour qu'un nouveau
-    "Lancer une recherche" avance dans la liste plutôt que de toujours
-    redemander les mêmes premiers résultats.
-
-    Le curseur est scopé par combinaison (query_key) et non plus
-    globalement par source : avec des recherches de niche (peu de
-    résultats par combinaison), une seule combinaison épuisée ne doit
-    pas remettre à zéro le curseur de toutes les autres.
-    """
+    
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='scrape_cursors')
     source = models.CharField(max_length=20)
     query_key = models.CharField(max_length=255, default='', blank=True, help_text="role|location normalisés")
@@ -466,12 +394,7 @@ class ScrapeCursor(models.Model):
 
 
 class CareerPulseSnapshot(models.Model):
-    """
-    Point quotidien du Career Pulse et de ses composantes. Un seul
-    enregistrement par utilisateur et par jour (idempotent) : relancer
-    le calcul plusieurs fois la même journée met juste à jour ce point,
-    n'en crée jamais un second.
-    """
+   
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='pulse_snapshots')
     captured_at = models.DateField(auto_now_add=True)
 
@@ -497,11 +420,7 @@ class CareerPulseSnapshot(models.Model):
 
 
 class SkillTrendSnapshot(models.Model):
-    """
-    Présence quotidienne (%) d'une compétence dans les offres déjà
-    collectées d'un utilisateur. Comparer deux points enregistrés donne
-    une évolution réelle — jamais un pourcentage de tendance inventé.
-    """
+    
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='skill_trend_snapshots')
     skill = models.CharField(max_length=255)
     share = models.FloatField(help_text="Pourcentage des offres mentionnant cette compétence")
@@ -520,13 +439,7 @@ class SkillTrendSnapshot(models.Model):
 
 
 class TwoFactorAuth(models.Model):
-    """
-    Authentification à deux facteurs (TOTP — Time-based One-Time
-    Password, standard RFC 6238 utilisé par Google Authenticator, Authy,
-    etc.). Le secret n'est jamais renvoyé après l'activation initiale ;
-    seuls les codes de récupération à usage unique permettent de
-    retrouver l'accès en cas de perte de l'appareil.
-    """
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='two_factor_auth')
     secret = models.CharField(max_length=64)
     enabled = models.BooleanField(default=False)
@@ -540,11 +453,6 @@ class TwoFactorAuth(models.Model):
 
 
 class Notification(models.Model):
-    """
-    Notification in-app. Pas d'envoi d'e-mail réel pour l'instant (ça
-    demanderait un vrai serveur SMTP configuré, pas seulement la
-    console de développement) — uniquement une cloche dans l'interface.
-    """
 
     TYPE_CHOICES = [
         ('new_excellent_match', 'Nouvelle offre excellente'),
@@ -572,12 +480,7 @@ class Notification(models.Model):
 
 
 class DailyActionCompletion(models.Model):
-    """
-    Marque une priorité du jour comme traitée. Les priorités elles-mêmes
-    sont recalculées à chaque chargement (jamais figées) — ce modèle ne
-    fait que retenir, pour la date du jour, quels types d'action ont déjà
-    été cochés, pour ne pas les re-proposer une fois traités.
-    """
+    
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='daily_completions')
     action_type = models.CharField(max_length=30)
     completed_for_date = models.DateField()
@@ -591,13 +494,6 @@ class DailyActionCompletion(models.Model):
 
 
 class LinkedInPost(models.Model):
-    """
-    Post LinkedIn sauvegardé (idée, brouillon ou publié). Permet de
-    calculer un vrai "Content Gap" (compétences jamais abordées dans
-    aucun post) et un calendrier éditorial personnel — aucune
-    publication automatique sur LinkedIn, Clutchr n'a aucune intégration
-    avec leur API.
-    """
 
     STATUS_CHOICES = [
         ('idee', 'Idée'),

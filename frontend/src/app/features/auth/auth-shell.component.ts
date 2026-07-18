@@ -393,7 +393,6 @@ constructor(
     });
   }
 
-  // --- Google Identity Services (best effort, nécessite GOOGLE_CLIENT_ID) ---
 
   private loadGoogleScript(): Promise<void> {
     return new Promise((resolve) => {
