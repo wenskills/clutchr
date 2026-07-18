@@ -19,8 +19,7 @@ const ICON: Record<NotifyType, string> = {
 
 /**
  * Mascotte personnage fixe en bas à droite de l'écran, qui affiche les
- * messages de l'app (succès/info/alerte/erreur) en bulles au-dessus
- * de lui plutôt qu'en toasts plats.
+ * messages de l'app (succès/info/alerte/erreur)
  */
 @Component({
   selector: 'app-mascot',
