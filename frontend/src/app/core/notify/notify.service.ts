@@ -9,12 +9,6 @@ export interface NotifyMessage {
   message: string;
 }
 
-/**
- * Remplace les toasts plats par des bulles affichées au-dessus d'un
- * petit personnage fixe en bas à droite de l'écran — un repère visuel
- * constant plutôt qu'un message qui surgit n'importe où. Les bulles
- * s'empilent et se referment automatiquement, jamais bloquantes.
- */
 @Injectable({ providedIn: 'root' })
 export class NotifyService {
   private nextId = 1;
