@@ -1,20 +1,5 @@
 """
-Connecteur France Travail (ex Pôle Emploi) — API officielle française,
-gratuite, en libre accès après inscription sur francetravail.io.
-
-Contrairement à Adzuna (simple clé d'API), France Travail utilise OAuth2
-(client_credentials) : il faut d'abord échanger client_id/client_secret
-contre un jeton d'accès temporaire, puis l'utiliser en Bearer sur l'API
-de recherche d'offres.
-
-Le paramètre "lieu" de cette API attend un code commune INSEE, pas un
-nom de ville libre — la résolution est faite automatiquement via
-utils/geocoding.py (API gouv.fr, gratuite, sans clé).
-
-Configuration requise (.env) :
-    FRANCETRAVAIL_CLIENT_ID=...
-    FRANCETRAVAIL_CLIENT_SECRET=...
-Inscription gratuite : https://francetravail.io/inscription
+Connecteur France Travail API officielle
 """
 import logging
 import re
@@ -70,7 +55,6 @@ class FranceTravailScraper(BaseJobScraper):
 
         data = response.json()
         self._access_token = data.get('access_token')
-        # 'expires_in' est en secondes ; marge de sécurité de 30s.
         self._token_expires_at = time.time() + max(data.get('expires_in', 1500) - 30, 60)
         return self._access_token
 
@@ -87,10 +71,6 @@ class FranceTravailScraper(BaseJobScraper):
         if not token:
             return []
 
-        # Pagination réelle via le paramètre 'range' (p-d). La doc Swagger
-        # confirme p ≤ 3000 et d ≤ 3149 : on peut donc vraiment avancer
-        # page après page, pas seulement lire les 50 premiers résultats
-        # à chaque lancement.
         page_size = min(results_limit, 50)
         range_start = (page - 1) * page_size
         if range_start > 3000:
@@ -109,19 +89,13 @@ class FranceTravailScraper(BaseJobScraper):
                     "recherche France Travail élargie à toute la France pour cette requête."
                 )
 
-        # Seuls CDI et CDD sont confirmés par la documentation Swagger de
-        # cette API (exemple officiel : typeContrat=CDI). Les codes pour
-        # Alternance/Stage/Freelance ne sont pas documentés avec certitude
-        # ailleurs dans la doc fournie — on préfère ne pas envoyer un code
-        # deviné qui retournerait silencieusement zéro résultat, et on
-        # laisse ces cas être couverts par les mots-clés de la requête.
         filters = filters or {}
         contract_type = filters.get('contract_type')
         if contract_type in ('cdi', 'cdd'):
             params['typeContrat'] = contract_type.upper()
         if filters.get('salary_min'):
             params['salaireMin'] = filters['salary_min']
-            params['periodeSalaire'] = 'A'  # Annuel — requis par l'API dès que salaireMin est fourni
+            params['periodeSalaire'] = 'A' 
 
         params['range'] = f'{range_start}-{range_end}'
 
@@ -132,18 +106,15 @@ class FranceTravailScraper(BaseJobScraper):
                 headers={'Authorization': f'Bearer {token}'},
                 timeout=10,
             )
-            # 204 = aucun résultat (corps vide, ce n'est pas une erreur).
+        
             if response.status_code == 204:
                 return []
-            # 206 = succès partiel (pagination), tout à fait normal ici.
             if response.status_code not in (200, 206):
                 response.raise_for_status()
         except requests.RequestException as exc:
             logger.error(f"Erreur appel France Travail pour '{query}' / '{location}': {exc}")
             return []
 
-        # Content-Range format: "offres p-d/t" — t = total réel disponible,
-        # utile pour la transparence (même logique que pour Adzuna).
         content_range = response.headers.get('Content-Range', '')
         if '/' in content_range:
             try:
@@ -184,10 +155,7 @@ class FranceTravailScraper(BaseJobScraper):
         job_url = origine.get('urlOrigine') or (
             f"https://candidat.francetravail.fr/offres/recherche/detail/{offre.get('id', '')}"
         )
-
-        # France Travail fournit des compétences structurées
-        # (competences[].libelle) — bien plus fiable que de les redeviner
-        # depuis le texte de la description avec notre extracteur générique.
+        
         skills = [
             c.get('libelle', '').strip()
             for c in (offre.get('competences') or [])
@@ -213,12 +181,6 @@ class FranceTravailScraper(BaseJobScraper):
 
     @staticmethod
     def _parse_salary(salaire: dict):
-        """
-        Le salaire France Travail est un texte libre, ex:
-        "Mensuel de 2200.00 Euros à 2500.00 Euros sur 12 mois".
-        On tente d'extraire deux nombres ; sinon on renvoie (None, None)
-        plutôt que d'inventer une valeur.
-        """
         libelle = salaire.get('libelle', '') if salaire else ''
         if not libelle:
             return None, None
@@ -232,9 +194,6 @@ class FranceTravailScraper(BaseJobScraper):
         except ValueError:
             return None, None
 
-        # Mensuel -> on annualise grossièrement (x12) pour rester comparable
-        # à Adzuna (qui donne des salaires annuels). Approximatif mais
-        # documenté, pas caché.
         multiplier = 12 if 'mensuel' in libelle.lower() else 1
 
         if len(values) == 1:
