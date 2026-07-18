@@ -1,10 +1,5 @@
 """
-Ressources d'apprentissage réelles via l'API officielle YouTube Data
-v3 (gratuite, quota journalier généreux pour ce volume d'usage).
-
-Pas de scraping : YouTube protège activement son site contre ça, et
-l'API officielle couvre exactement le besoin (recherche par mot-clé,
-gratuite, avec clé API comme pour Gemini).
+Ressources d'apprentissage.
 """
 import logging
 
@@ -19,9 +14,7 @@ YOUTUBE_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
 def search_learning_resources(skill_name: str, max_results: int = 4) -> list:
     """
     Cherche des vidéos pédagogiques en français pour une compétence
-    donnée. Renvoie une liste vide (sans exception) si la clé n'est
-    pas configurée ou si l'appel échoue — l'absence de ressources
-    n'empêche jamais d'afficher le reste de la roadmap.
+    donnée.
     """
     api_key = getattr(settings, 'YOUTUBE_API_KEY', '')
     if not api_key:
