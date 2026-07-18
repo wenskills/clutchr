@@ -46,11 +46,6 @@ interface FollowupSuggestion {
   days_since: number;
 }
 
-/**
- * Pipeline de candidatures — Kanban avec glisser-déposer (Angular CDK)
- * couplé à de vrais indicateurs de pilotage, calculés depuis
- * l'historique réel des changements de statut.
- */
 @Component({
   selector: 'app-kanban',
   standalone: true,
