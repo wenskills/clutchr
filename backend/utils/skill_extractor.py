@@ -1,5 +1,5 @@
 """
-Skill extraction from text
+Skill extraction
 """
 import re
 from collections import Counter
@@ -9,9 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class SkillExtractor:
-    """Extract technical skills from text"""
     
-    # Tech skills taxonomy (can be expanded)
+    # Tech skills taxonomie
     TECH_SKILLS = {
         "Languages": [
             "Python", "JavaScript", "TypeScript", "Java", "Go", "Rust",
@@ -46,21 +45,11 @@ class SkillExtractor:
     }
     
     def __init__(self):
-        # Flatten skills for easier lookup
         self.all_skills = set()
         for category, skills in self.TECH_SKILLS.items():
             self.all_skills.update(skills)
     
     def extract_from_text(self, text):
-        """
-        Extract skills from any text
-        
-        Args:
-            text: Raw text (CV, LinkedIn profile, job description, etc.)
-        
-        Returns:
-            dict: {'skill_name': frequency_count}
-        """
         text_lower = text.lower()
         found_skills = {}
         
@@ -75,15 +64,6 @@ class SkillExtractor:
         return found_skills
     
     def extract_from_cv(self, cv_text):
-        """
-        Extract skills from CV with context awareness
-        
-        Args:
-            cv_text: CV/Resume text
-        
-        Returns:
-            dict: Extracted skills with weights
-        """
         skills = self.extract_from_text(cv_text)
         
         # Boost weight for skills in explicit "Skills" section
@@ -105,27 +85,9 @@ class SkillExtractor:
         return skills
     
     def rank_skills(self, skills_dict):
-        """
-        Rank skills by frequency
-        
-        Args:
-            skills_dict: {'skill': count}
-        
-        Returns:
-            list: [('skill', count), ...] sorted by count
-        """
         return sorted(skills_dict.items(), key=lambda x: x[1], reverse=True)
     
     def get_skill_categories(self, skills_list):
-        """
-        Categorize skills
-        
-        Args:
-            skills_list: ['Python', 'Django', 'PostgreSQL', ...]
-        
-        Returns:
-            dict: {'Backend': ['Django'], 'Languages': ['Python'], ...}
-        """
         categorized = {}
         
         for category, category_skills in self.TECH_SKILLS.items():
