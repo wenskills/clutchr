@@ -1,11 +1,5 @@
 """
 Service du tableau de bord décisionnel.
-
-Principe directeur : chaque élément affiché doit aider à répondre à
-"qu'est-ce que je fais aujourd'hui ?". Aucune priorité n'est générée
-par un modèle de langage ici — tout est calculé de façon déterministe
-à partir de données réellement présentes en base, pour qu'une priorité
-affichée soit toujours vérifiable et jamais une supposition.
 """
 from django.utils import timezone
 
