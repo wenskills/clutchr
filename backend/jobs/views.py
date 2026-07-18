@@ -1,5 +1,5 @@
 """
-REST API views for Clutchr
+REST API views Clutchr
 """
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
