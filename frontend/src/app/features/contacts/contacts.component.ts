@@ -393,14 +393,7 @@ export class ContactsComponent implements OnInit {
     this.loadContacts(false, 1);
   }
 
-  /**
-   * Une seule couleur d'accent discrète par entreprise (bordure fine),
-   * pas un bandeau coloré plein écran — la couleur reste un repère, pas
-   * l'élément principal de la carte.
-   */
   accentFor(companyName: string): string {
-    // Restreint à la palette de marque, cohérent avec Offres — plus de
-    // couleurs arc-en-ciel hors DA de l'app.
     const palette = ['#7C5CFF', '#C026D3'];
     let hash = 0;
     for (const ch of companyName) hash = (hash * 31 + ch.charCodeAt(0)) % palette.length;
@@ -409,14 +402,6 @@ export class ContactsComponent implements OnInit {
 
   logoFailed = new Set<number>();
 
-  /**
-   * Tente un vrai logo via favicon.im, à partir d'un domaine deviné.
-   * favicon.im renvoie une vraie erreur 404 sur domaine inconnu (avec
-   * throw-error-on-404=true), donc le repli vers l'avatar coloré se
-   * déclenche réellement — contrairement au service de favicons de
-   * Google essayé avant, qui renvoyait un globe générique à la place
-   * d'une erreur. Reste un essai au mieux, pas une garantie.
-   */
   logoUrlFor(companyName: string): string {
     const guessedDomain = (companyName || '')
       .toLowerCase()
@@ -462,10 +447,6 @@ export class ContactsComponent implements OnInit {
         list.forEach((c: ContactVM) => { if (!this.roleByContact[c.id]) this.roleByContact[c.id] = 'recruteur'; });
         this.loading.set(false);
 
-        // Première visite sans aucune entreprise suivie : on synchronise
-        // tout de suite plutôt que de montrer un écran vide en attendant
-        // un clic. Si des entreprises existent déjà, on synchronise aussi
-        // silencieusement en arrière-plan pour capter les nouvelles.
         if (autoSyncIfEmpty) this.syncFromMatches(this.totalCount() === 0);
       },
       error: () => { this.loading.set(false); }
