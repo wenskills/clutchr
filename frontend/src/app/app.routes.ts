@@ -27,8 +27,6 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/reset-password-confirm.component').then(m => m.ResetPasswordConfirmComponent)
   },
 
-  // --- Tout ce qui suit nécessite une connexion : aucune page interne
-  // n'est accessible sans token valide, même vide de données. ---
   {
     path: 'import-profil',
     loadComponent: () => import('./features/onboarding/profile-import.component').then(m => m.ProfileImportComponent),
