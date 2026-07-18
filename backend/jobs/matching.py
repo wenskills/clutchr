@@ -1,11 +1,5 @@
 """
-Moteur de correspondance profil <-> offre.
-
-Principe : on ne note QUE ce qu'on peut réellement évaluer avec les
-données disponibles. S'il manque une info (salaire, expérience requise,
-compétences détectables dans la description), on ne fabrique pas un
-score à 0 par défaut — on retire cette composante et on redistribue
-son poids entre les critères qu'on peut effectivement mesurer.
+Correspondance profil <-> offre.
 """
 import re
 
@@ -13,7 +7,7 @@ from utils.skill_extractor import SkillExtractor
 
 _extractor = SkillExtractor()
 
-# Poids "idéaux" quand toutes les données sont disponibles.
+# Poids quand toutes les données sont disponibles.
 WEIGHT_SKILL = 0.45
 WEIGHT_LOCATION = 0.15
 WEIGHT_EXPERIENCE = 0.20
@@ -49,8 +43,6 @@ def extract_required_experience(description: str):
     Tente d'estimer la fourchette d'années d'expérience demandée par
     l'offre, à partir de motifs textuels courants en français.
     Renvoie (min_years, max_years) ou None si rien n'a pu être détecté
-    (dans ce cas, le critère expérience est simplement exclu du score,
-    pas pénalisé).
     """
     if not description:
         return None
@@ -79,9 +71,7 @@ def compute_skill_match(user_skills: dict, job_required_skills: list):
     Compare les compétences du profil aux compétences détectées dans
     l'offre. Si l'extraction n'a rien trouvé dans la description (ça
     arrive : descriptions courtes, formulations non standard...), le
-    critère est marqué "non évaluable" plutôt que noté 0 — une offre
-    pertinente ne doit pas être punie simplement parce que sa
-    description ne contient pas un mot-clé de notre liste.
+    critère est marqué "non évaluable" plutôt que noté 0
     """
     job_skills_set = {s.lower() for s in job_required_skills}
     user_skills_set = {s.lower(): s for s in user_skills.keys()}
@@ -227,9 +217,7 @@ def compute_match(user_profile, job_listing) -> dict:
 def aggregate_skill_gaps(matches_queryset, limit: int = 15) -> list:
     """
     Agrège les compétences manquantes (déjà calculées par match) sur un
-    ensemble de JobMatch, classées par fréquence. Réutilisé par la vue
-    "Analyse d'écart" ET par les générateurs IA (idées de posts, feuille
-    de route) pour rester cohérent — une seule source de vérité.
+    ensemble de JobMatch, classées par fréquence
     """
     total = matches_queryset.count()
     if total == 0:
@@ -250,15 +238,7 @@ def aggregate_skill_gaps(matches_queryset, limit: int = 15) -> list:
 def simulate_skill_addition(profile, skills_to_add: list) -> dict:
     """
     Recalcule le matching sur les offres déjà collectées du profil en
-    simulant l'ajout de compétences, SANS jamais persister quoi que ce
-    soit. Réutilise exactement compute_match() — aucune logique de
-    score dupliquée, donc aucun risque de divergence entre le score réel
-    et le score simulé.
-
-    L'impact salaire est calculé uniquement à partir des offres déjà
-    collectées de l'utilisateur (comparaison "avec ces compétences
-    demandées" vs "sans"), jamais à partir d'une statistique de marché
-    externe qu'on ne possède pas.
+    simulant l'ajout de compétences
     """
     import copy
     from jobs.models import JobMatch
