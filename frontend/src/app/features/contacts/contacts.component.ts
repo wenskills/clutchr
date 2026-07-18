@@ -48,12 +48,7 @@ const PERSON_STATUS_LABELS: Record<string, string> = {
 
 /**
  * Réseau & Contacts — suivi des entreprises à approcher, et des
- * personnes individuelles identifiées chez chacune. Clutchr ne scrape
- * jamais LinkedIn : les liens de recherche sont pré-remplis, les
- * fiches de personne sont saisies manuellement, et l'IA aide à
- * formuler les messages — jamais à collecter des profils.
- * Se synchronise automatiquement à l'arrivée — pas besoin de cliquer
- * avant de voir le moindre contact.
+ * personnes individuelles identifiées chez chacune. 
  */
 @Component({
   selector: 'app-contacts',
