@@ -16,12 +16,6 @@ interface AnalysisResult {
   suggestions: string[];
 }
 
-/**
- * Module "Contenu LinkedIn" — façon Grammarly : on colle un texte à
- * gauche, l'analyse + reformulation apparaissent à droite.
- * Propulsé par Gemini (côté backend) — affiche un message clair si
- * GEMINI_API_KEY n'est pas configurée plutôt que de planter.
- */
 @Component({
   selector: 'app-linkedin-content',
   standalone: true,
