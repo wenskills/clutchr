@@ -1,8 +1,5 @@
 """
 Scraper GitHub Trending.
-
-GitHub n'expose AUCUNE API officielle pour les tendances (contrairement
-aux données de repo classiques, disponibles via api.github.com).
 """
 import logging
 import re
@@ -18,12 +15,6 @@ USER_AGENT = "ClutchrTrendBot/1.0 (usage personnel, github.com/trending autorise
 
 
 def fetch_trending_repos(language: str = '', since: str = 'daily', limit: int = 15) -> list:
-    """
-    Scrape github.com/trending (HTML) et renvoie une liste de dicts :
-    [{rank, repo_name, owner, description, language, stars_total, stars_period, period}]
-
-    `since` ∈ {'daily', 'weekly', 'monthly'}
-    """
     url = TRENDING_URL
     if language:
         url += f"/{language}"
@@ -89,11 +80,9 @@ def _parse_repo_article(article, rank: int, since: str) -> dict:
 
 
 def _parse_int(text: str) -> int:
-    """Extrait un entier d'une chaîne type '1,234 stars today' -> 1234."""
     digits = re.sub(r'[^\d]', '', text)
     return int(digits) if digits else 0
 
 
 def polite_delay(seconds: float = 1.0):
-    """Pause courte entre deux requêtes successives (plusieurs langages)."""
     time.sleep(seconds)
