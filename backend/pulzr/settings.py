@@ -139,6 +139,15 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='no-reply@clutchr.app'
 # le bouton Google côté frontend (message explicatif au lieu d'une erreur).
 GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
 
+# Synchronisation photo LinkedIn (Sign In with LinkedIn / OpenID Connect,
+# produit gratuit du LinkedIn Developer Portal). Fournit uniquement
+# id/nom/photo/email — pas le titre/headline, qui reste géré manuellement
+# ou via l'import PDF existant. Laisser vide désactive proprement le
+# bouton côté frontend.
+LINKEDIN_CLIENT_ID = config('LINKEDIN_CLIENT_ID', default='')
+LINKEDIN_CLIENT_SECRET = config('LINKEDIN_CLIENT_SECRET', default='')
+LINKEDIN_REDIRECT_URI = config('LINKEDIN_REDIRECT_URI', default='http://localhost:4200/profil')
+
 # Recherche d'offres — Adzuna (API publique gratuite, inscription sur
 # https://developer.adzuna.com/). Indeed (API de recherche dépréciée) et
 # Glassdoor (pas d'API publique).
