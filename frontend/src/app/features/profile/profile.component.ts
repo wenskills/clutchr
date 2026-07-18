@@ -2,11 +2,13 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router, ActivatedRoute } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthService } from '../../core/auth/auth.service';
 import { SidebarComponent } from '../../shared/sidebar.component';
 import { IconComponent } from '../../shared/icon.component';
 import { NotifyService } from '../../core/notify/notify.service';
+import { LINKEDIN_CLIENT_ID, LINKEDIN_REDIRECT_URI } from '../../core/config';
 
 interface SkillEntry { name: string; weight: number; }
 type ProfileTab = 'profil' | 'competences' | 'objectifs';
@@ -34,15 +36,26 @@ type ProfileTab = 'profil' | 'competences' | 'objectifs';
       <!-- PROFIL -->
       <section class="tab-panel" *ngIf="tab() === 'profil'">
         <div class="card avatar-card">
-          <div class="avatar-big">{{ initials() }}</div>
+          <div class="avatar-big" [class.has-photo]="avatarUrl()">
+            <img *ngIf="avatarUrl()" [src]="avatarUrl()" alt="Photo de profil">
+            <ng-container *ngIf="!avatarUrl()">{{ initials() }}</ng-container>
+          </div>
           <div class="avatar-info">
             <h2>{{ structuredTitre || displayName() }}</h2>
             <p class="muted">{{ currentRole || 'Poste non renseigné' }}</p>
           </div>
+          <button class="btn-sync" (click)="connectLinkedInPhoto()" [disabled]="syncingLinkedinPhoto()" title="Récupère votre photo depuis LinkedIn (Sign In with LinkedIn)">
+            <app-icon [name]="syncingLinkedinPhoto() ? 'refresh' : 'user'" [size]="14" [class.spin]="syncingLinkedinPhoto()"></app-icon>
+            {{ syncingLinkedinPhoto() ? 'Synchronisation...' : 'Synchroniser ma photo LinkedIn' }}
+          </button>
           <button class="btn-sync" (click)="syncFromDocuments()" [disabled]="structuring()" title="Relance l'analyse IA à partir de vos documents importés">
             <app-icon [name]="structuring() ? 'refresh' : 'sparkles'" [size]="14" [class.spin]="structuring()"></app-icon>
             {{ structuring() ? 'Synchronisation...' : 'Synchroniser mes données' }}
           </button>
+        </div>
+
+        <div class="config-warning" *ngIf="linkedinPhotoNotConfigured()">
+          Synchronisation LinkedIn non configurée côté serveur (LINKEDIN_CLIENT_ID / LINKEDIN_CLIENT_SECRET manquants).
         </div>
 
         <div class="config-warning" *ngIf="structureNotConfigured()">
@@ -320,6 +333,8 @@ type ProfileTab = 'profil' | 'competences' | 'objectifs';
     .count-pill { background:#F1EEFF; color:#7C5CFF; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px; }
 
     .avatar-card { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .avatar-big.has-photo { padding:0; overflow:hidden; }
+    .avatar-big img { width:100%; height:100%; object-fit:cover; border-radius:inherit; }
     .avatar-big {
       width:56px; height:56px; border-radius:50%; flex-shrink:0;
       background:linear-gradient(135deg,#7C5CFF,#F857C1); color:white;
@@ -484,6 +499,10 @@ export class ProfileComponent implements OnInit {
   previewUrl = signal<SafeResourceUrl | null>(null);
   private previewBlobUrl: string | null = null;
 
+  avatarUrl = signal<string | null>(null);
+  syncingLinkedinPhoto = signal(false);
+  linkedinPhotoNotConfigured = signal(false);
+
   structuring = signal(false);
   structureNotConfigured = signal(false);
   hasStructuredProfile = signal(false);
@@ -496,10 +515,56 @@ export class ProfileComponent implements OnInit {
   savingSkills = signal(false);
   savingPrefs = signal(false);
 
-  constructor(private http: HttpClient, private auth: AuthService, private sanitizer: DomSanitizer, private notify: NotifyService) {}
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+    private sanitizer: DomSanitizer,
+    private notify: NotifyService,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit() {
     this.loadProfile();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['code']) {
+        this.exchangeLinkedInCode(params['code']);
+        this.router.navigate([], { queryParams: {}, replaceUrl: true });
+      }
+    });
+  }
+
+  connectLinkedInPhoto() {
+    if (!LINKEDIN_CLIENT_ID) {
+      this.linkedinPhotoNotConfigured.set(true);
+      return;
+    }
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: LINKEDIN_CLIENT_ID,
+      redirect_uri: LINKEDIN_REDIRECT_URI,
+      scope: 'openid profile',
+      state: crypto.randomUUID(),
+    });
+    window.location.href = `https://www.linkedin.com/oauth/v2/authorization?${params}`;
+  }
+
+  private exchangeLinkedInCode(code: string) {
+    this.syncingLinkedinPhoto.set(true);
+    this.linkedinPhotoNotConfigured.set(false);
+    this.http.post<any>(`${this.apiUrl}/profile/sync-linkedin-photo/`, { code }).subscribe({
+      next: (profile) => {
+        this.syncingLinkedinPhoto.set(false);
+        this.avatarUrl.set(profile.avatar || null);
+        this.showToast('Photo LinkedIn synchronisée');
+      },
+      error: (err) => {
+        this.syncingLinkedinPhoto.set(false);
+        if (err.status === 501) this.linkedinPhotoNotConfigured.set(true);
+        else this.showToast(AuthService.extractErrorMessage(err), true);
+      }
+    });
   }
 
   displayName(): string {
@@ -514,6 +579,7 @@ export class ProfileComponent implements OnInit {
   private loadProfile() {
     this.http.get<any>(`${this.apiUrl}/profile/me/`).subscribe({
       next: (p) => {
+        this.avatarUrl.set(p.avatar || null);
         const skillsDict = p.extracted_skills || {};
         this.skills.set(Object.entries(skillsDict).map(([name, weight]) => ({ name, weight: Number(weight) })));
         this.targetRoles.set(p.target_roles || []);
