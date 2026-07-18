@@ -1,11 +1,6 @@
 """
-Module "Contenu LinkedIn" — analyse, reformulation et idées de posts,
-propulsé par Gemini (appel REST direct, pas de SDK pour éviter une
-dépendance lourde supplémentaire).
-
-Configuration requise (.env) :
-    GEMINI_API_KEY=...
-    GEMINI_MODEL=gemini-2.5-flash   (optionnel, valeur par défaut)
+Contenu LinkedIn: analyse, reformulation et idées de posts,
+propulsé par Gemini
 """
 import json
 import logging
